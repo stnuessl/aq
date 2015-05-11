@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2015  Steffen Nüssle
-# wiki
+# aq - aur query
 #
 # This file is part of aq.
 #
@@ -19,7 +19,7 @@
 #
 
 #
-# Simple Makefile for wiki to wrap the go toolchain into 
+# Simple Makefile for aq to wrap the go toolchain into 
 # a more familiar format
 #
 
