@@ -48,15 +48,9 @@ func (this *ProgOpts) Add(s string, l string, val interface{}, desc string) {
     this.opts = append(this.opts, option{s, l, val, desc})
 }
 
-func expected0ArgErr(opt string, passed int) error {
-    msg := "Option \"%s\" does not expect any arguments but %d was/were given"
-    
-    return fmt.Errorf(msg, opt, passed)
-}
-
-func expected1ArgErr(opt string, passed int) error {
-    msg := "Option \"%s\" expects one argument but %d was/were given"
-    return fmt.Errorf(msg, opt, passed)
+func expected1ArgErr(opt string) error {
+    msg := "Option \"%s\" expects one argument but zero were given"
+    return fmt.Errorf(msg, opt)
 }
 
 func expectedAtLeastOneArg(opt string) error {
@@ -80,17 +74,16 @@ func handle(arg string, i int, optMap optionMap, args []string) (int, error) {
         
         switch val := opt.val.(type) {
         case *bool:
-            if j - i > 0 {
-                return 0, expected0ArgErr(opt.lOpt, j - i)
-            }
-            
+
             *val = true
         case *string:
-            if j - i > 1 {
-                return 0, expected1ArgErr(opt.lOpt, j - i)
+            if j - i < 1 {
+                return 0, expected1ArgErr(opt.lOpt)
             }
             
-            *val = args[i + 1]
+            j = i + 1
+            
+            *val = args[j]
         case *[]string:
             if j - i == 0 {
                 return 0, expectedAtLeastOneArg(opt.lOpt)
@@ -98,11 +91,13 @@ func handle(arg string, i int, optMap optionMap, args []string) (int, error) {
             
             *val = args[i + 1:j + 1]
         case *int:
-            if j - i > 1 {
-                return 0, expected1ArgErr(opt.lOpt, j - i)
+            if j - i < 1 {
+                return 0, expected1ArgErr(opt.lOpt)
             }
             
-            tmp, err := strconv.Atoi(args[i + 1])
+            j = i + 1
+            
+            tmp, err := strconv.Atoi(args[j])
             if err != nil {
                 return 0, err
             }
