@@ -176,7 +176,7 @@ func (this PackageInfo) String() string {
                         this.URLPath, this.NumVotes)
 }
 
-func build_url(t string, arg string) string {
+func buildURL(t string, arg string) string {
     buf := bytes.NewBufferString("https://aur.archlinux.org/rpc.php")
     
     buf.WriteString("?type=")
@@ -187,7 +187,7 @@ func build_url(t string, arg string) string {
     return buf.String()
 }
 
-func invalid_response_type(t string, ex string) error {
+func invalidResponseType(t string, ex string) error {
     return fmt.Errorf("Invalid response type \"%s\" - expected \"%s\"\n", t, ex)
 }
 
@@ -246,7 +246,7 @@ func NewAurAPI(debug bool) *AurAPI {
 }
 
 func (this *AurAPI) PackageInfo(pkg string) (*PackageInfo, error) {
-    url := build_url("info", pkg)
+    url := buildURL("info", pkg)
     
     resp, err := this.getResponse(url)
     if err != nil {
@@ -254,7 +254,7 @@ func (this *AurAPI) PackageInfo(pkg string) (*PackageInfo, error) {
     }
 
     if resp.Type != "info" {
-         return nil, invalid_response_type(resp.Type, "info")
+        return nil, invalidResponseType(resp.Type, "info")
     }
     
     m := resp.Results.(map[string]interface{})
@@ -263,7 +263,7 @@ func (this *AurAPI) PackageInfo(pkg string) (*PackageInfo, error) {
 }
 
 func (this *AurAPI) Search(pkg string, limit int) ([]PackageInfo, error) {
-    url := build_url("search", pkg)
+    url := buildURL("search", pkg)
     
     resp, err := this.getResponse(url)
     if err != nil {
@@ -271,7 +271,7 @@ func (this *AurAPI) Search(pkg string, limit int) ([]PackageInfo, error) {
     }
     
     if resp.Type != "search" {
-        return nil, invalid_response_type(resp.Type, "search")
+        return nil, invalidResponseType(resp.Type, "search")
     }
     
     list := resp.Results.([]interface{})

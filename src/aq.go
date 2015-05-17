@@ -26,6 +26,7 @@ import (
     "io"
     "os"
     "log"
+    "strings"
 )
 
 import (
@@ -119,8 +120,12 @@ func main() {
             log.Fatal(err)
         }
         
+        line := strings.Repeat("-", 50)
+        
+        fmt.Printf("%7s  %-30s  %s\n%s\n", "Votes", "Package Name", "Id", line)
+        
         for _, y := range pkgInfoList {
-            fmt.Printf("%7d %s\n", y.NumVotes, y.Name)
+            fmt.Printf("%7d  %-30s  %7d\n", y.NumVotes, y.Name, y.ID)
         }
     }
     
