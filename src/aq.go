@@ -30,6 +30,7 @@ import (
 
 import (
     "aurapi"
+    "progopts"
 )
 
 func untar(tarReader *tar.Reader) error {
@@ -75,18 +76,63 @@ func untar(tarReader *tar.Reader) error {
 }
 
 func main() {
+    pkgs    := make([]string, 0, 10)
+    info    := make([]string, 0, 10)
+    search  := make([]string, 0, 10)
+    limit   := 10
+    help    := false
+    debug   := false
     
-    pkgName := os.Args[1]
+    opts := progopts.New()
+
+    opts.Add("p", "package",    &pkgs,      "Download and unpack a package.")
+    opts.Add("i", "info",       &info,      "Show package information.")
+    opts.Add("s", "search",     &search,    "Search for a package.")
+    opts.Add("l", "limit",      &limit,     "Limit amount of search results.")
+    opts.Add("",  "help",       &help,      "Show this help message.")
+    opts.Add("",  "debug",      &debug,     "Enable debug output.")
     
-    api := aurapi.NewAurAPI(true)
-    
-    tarReader, err := api.GetPackage(pkgName)
+    err := opts.ParseArgs(os.Args[1:])
     if err != nil {
         log.Fatal(err)
     }
     
-    err = untar(tarReader)
-    if err != nil {
-        log.Fatal(err)
+    if help {
+        opts.Usage(os.Args[0] + " --opt1 [arg1] [arg2] --opt2 [arg1] ...")
+        os.Exit(0)
+    }
+
+    api := aurapi.NewAurAPI(debug)
+    
+    for _, x := range info {
+        pkgInfo, err := api.PackageInfo(x)
+        if err != nil {
+            log.Fatal(err)
+        }
+                
+        fmt.Printf("%s\n", pkgInfo)
+    }
+        
+    for _, x := range search {
+        pkgInfoList, err := api.Search(x, limit)
+        if err != nil {
+            log.Fatal(err)
+        }
+        
+        for _, y := range pkgInfoList {
+            fmt.Printf("%7d %s\n", y.NumVotes, y.Name)
+        }
+    }
+    
+    for _, x := range pkgs {
+        tarReader, err := api.Package(x)
+        if err != nil {
+            log.Fatal(err)
+        }
+        
+        err = untar(tarReader)
+        if err != nil {
+            log.Fatal(err)
+        }
     }
 }

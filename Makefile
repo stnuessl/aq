@@ -25,7 +25,8 @@
 
 BIN =	aq
 SRC =	src/aq.go 				\
-	src/aurapi/aurapi.go
+	src/aurapi/aurapi.go			\
+	src/progopts/progopts.go
 
 INSTALL_DIR ?=	/usr/local/bin/
 

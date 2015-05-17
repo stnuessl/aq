@@ -75,6 +75,14 @@ func (this byNumVotes) Swap(i, j int) {
     this[i], this[j] = this[j], this[i]
 }
 
+func min(a, b int) int {
+    if a < b {
+        return a
+    } else {
+        return b
+    }
+}
+
 func newPackageInfoFromJsonVal(val map[string]interface{}) *PackageInfo {
     ret := &PackageInfo{}
     
@@ -120,7 +128,9 @@ func newPackageInfoFromJsonVal(val map[string]interface{}) *PackageInfo {
         ret.ID = int(id.(float64))
     }
     
-    ret.OutOfDate = ood != nil
+    if ood != nil {
+        ret.OutOfDate = ood.(float64) != 0.0
+    }
     
     if last != nil {
         ret.LastModified = int(last.(float64))
@@ -235,7 +245,7 @@ func NewAurAPI(debug bool) *AurAPI {
     return &AurAPI{http.Client{}, debug}
 }
 
-func (this *AurAPI) GetPackageInfo(pkg string) (*PackageInfo, error) {
+func (this *AurAPI) PackageInfo(pkg string) (*PackageInfo, error) {
     url := build_url("info", pkg)
     
     resp, err := this.getResponse(url)
@@ -252,7 +262,7 @@ func (this *AurAPI) GetPackageInfo(pkg string) (*PackageInfo, error) {
     return newPackageInfoFromJsonVal(m), nil
 }
 
-func (this *AurAPI) SearchPackages(pkg string) ([]PackageInfo, error) {
+func (this *AurAPI) Search(pkg string, limit int) ([]PackageInfo, error) {
     url := build_url("search", pkg)
     
     resp, err := this.getResponse(url)
@@ -275,7 +285,7 @@ func (this *AurAPI) SearchPackages(pkg string) ([]PackageInfo, error) {
     
     sort.Sort(byNumVotes(ret))
     
-    return ret, nil
+    return ret[:min(len(ret), limit)], nil
 }
 
 func getPackageUrl(urlpath string) string {
@@ -286,8 +296,8 @@ func getPackageUrl(urlpath string) string {
     return buf.String()
 }
 
-func (this *AurAPI) GetPackage(pkg string) (*tar.Reader, error) {
-    info, err := this.GetPackageInfo(pkg)
+func (this *AurAPI) Package(pkg string) (*tar.Reader, error) {
+    info, err := this.PackageInfo(pkg)
     if err != nil {
         return nil, err
     }
